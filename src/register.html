@@ -3,33 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입</title>
+    <title>회원가입 페이지</title>
+    
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function login_valid_check() {
+     
+            const id = $("#id").val().trim(); // 아이디
+            const pw = $("#password").val().trim(); // 비밀번호
+            const email = $("#email").val().trim(); // 이메일
+
+            // ===== 클라이언트 기본 유효성 검사 =====
+
+            if (!id) {
+                alert("아이디를 입력해주세요.");
+                return false;
+            }
+
+            if (!email) {
+                alert("이메일을 입력해 주세요.");
+                return false;
+            }
+
+            if (!pw) {
+                alert("비밀번호를 입력해 주세요.");
+                return false;
+            }
+
+            var data = {
+                user_pw : pw,
+                user_id : id,
+                email : email
+            };
+
+            $.ajax({
+                url: "register.php",     // 요청 보낼 서버 주소
+                type: "POST",            // 전송 방식
+                dataType: "json",        // 서버에서 받을 데이터 형식
+                data: data, // 전송할 값
+
+                success: function(res) { // 성공 시 실행
+                    if (res.code == "1") { // 성공 시 이동
+                        location.href = "/login.html"
+                    } else {
+                        alert(res.msg); // 다른 오류 코드 일시
+                    }
+                },       
+                error: function (xhr, status, err) { 
+                    // 서버에서 온 에러 정보를 함수에 전달
+                    handleServerError(xhr, status, err);
+                }
+            });
+        }
+
+      // 서버 통신 에러 전용 처리 함수
+        function handleServerError(xhr, status, err) {
+            alert(xhr.responseText);
+            // xhr.status: 404, 500, 403 같은 HTTP 상태 코드를 알려줍니다.
+            let message = "서버 통신 중 오류가 발생했습니다.";
+            
+            // 상태 코드별로 다른 메시지 처리 (선택 사항)
+            if (xhr.status === "다른 아이디") {
+                message = "이미 사용 중인 아이디입니다. 다른 아이디를 입력해 주세요.";
+            } else if (xhr.status === 500) {
+                message = "서버 내부 오류가 발생했습니다. (500)";
+            } else {
+
+            }
+            
+            alert(xhr.responseText);
+        }
+    </script>
+
 <body>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card mt-5">
                     <div class="card-header">
-                        <h4>회원가입11</h4>
+                        <h4>회원가입</h4>
                     </div>
                     <div class="card-body">
-                        <form action="register.php" method="post">
                             <div class="form-group">
-                                <label for="username">아이디</label>
-                                <input type="text" name="username" id="username" class="form-control" required>
+                                <label for="id">아이디</label>
+                                <input type="text" name="user_id" id="id" class="form-control" placeholder="아이디를 입력해주세요" required>
                             </div>
                             <div class="form-group">
                                 <label for="email">이메일</label>
-                                <input type="email" name="email" id="email" class="form-control" required>
+                                <input type="email" name="email" id="email" class="form-control"placeholder="이메일을 입력해주세요" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">비밀번호</label>
-                                <input type="password" name="password" id="password" class="form-control" required>
+                                <input type="password" name="user_pw" id="password" class="form-control" placeholder="비밀번호를 입력해주세요" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">등록</button>
-                        </form>
+                            <button onclick="login_valid_check();" class="btn btn-primary">회원가입하기</button>
                     </div>
                 </div>
             </div>

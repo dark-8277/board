@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once 'connect.php';
-require_once 'DBConn.php';
+// 수정 후
+require_once("common/connect.php");
+require_once("common/DBConn.php");
 
 ?>
 <!DOCTYPE html>
@@ -37,7 +38,7 @@ require_once 'DBConn.php';
 <body>
     <div class="card login-card">
         <div class="card-header text-center bg-primary text-white p-4">
-            <h3>페이지 로그인</h3>
+            <h3>페이지 로그인11</h3>
         </div>
         <div class="card-body p-5">
             <form action="login.php" method="post">
