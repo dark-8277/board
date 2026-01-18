@@ -1,0 +1,205 @@
+# services:
+#   dev-php:
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     image: board_php
+#     container_name: board_container
+#     environment:
+#       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     ports:
+#       - '48090:80'
+#     volumes:
+#         - './src:/var/www/html'
+#         - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+#     depends_on:
+#       - db
+
+#   dev2-php:
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     image: board_php
+#     container_name: board_api_container
+#     environment:
+#       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     ports:
+#       - '48091:80'
+#     volumes:
+#         - './src/api:/var/www/html'
+#         - './src/common:/var/www/common'
+#         - './../uploadfolder:/var/www/html/data'
+#         - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+#     depends_on:
+#       - db
+
+#   db:
+#     image: mysql:8.0
+#     container_name: board_mysql
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: board
+#       MYSQL_USER: boarduser
+#       MYSQL_PASSWORD: boardpass
+#     ports:
+#       - '3306:3306'
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+
+# volumes:
+#   mysql_data:
+services:
+  # 일반 웹 접속용 (회원가입, 로그인 등)
+  dev-php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: board_php
+    container_name: board_container
+    environment:
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - '48090:80'
+    volumes:
+      - './src:/var/www/html' # src 폴더 전체를 연결
+      - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+    depends_on:
+      - db
+
+  # API 전용 접속용 (board_list.html 등에서 호출)
+  dev2-php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: board_php
+    container_name: board_api_container
+    environment:
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - '48091:80'
+    volumes:
+      # [변경됨] src 전체를 연결해야 DBConn.php나 connect.php를 찾을 수 있습니다.
+      - './src:/var/www/html' 
+      - './../uploadfolder:/var/www/html/data'
+      - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+    depends_on:
+      - db
+
+  # 데이터베이스
+# services:
+#   dev-php:
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     image: board_php
+#     container_name: board_container
+#     environment:
+#       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     ports:
+#       - '48090:80'
+#     volumes:
+#         - './src:/var/www/html'
+#         - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+#     depends_on:
+#       - db
+
+#   dev2-php:
+#     build:
+#       context: .
+#       dockerfile: ./Dockerfile
+#     image: board_php
+#     container_name: board_api_container
+#     environment:
+#       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+#     extra_hosts:
+#       - "host.docker.internal:host-gateway"
+#     ports:
+#       - '48091:80'
+#     volumes:
+#         - './src/api:/var/www/html'
+#         - './src/common:/var/www/common'
+#         - './../uploadfolder:/var/www/html/data'
+#         - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+#     depends_on:
+#       - db
+
+#   db:
+#     image: mysql:8.0
+#     container_name: board_mysql
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: board
+#       MYSQL_USER: boarduser
+#       MYSQL_PASSWORD: boardpass
+#     ports:
+#       - '3306:3306'
+#     volumes:
+#       - mysql_data:/var/lib/mysql
+
+# volumes:
+#   mysql_data:
+services:
+  # 일반 웹 접속용 (회원가입, 로그인 등)
+  dev-php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: board_php
+    container_name: board_container
+    environment:
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - '48090:80'
+    volumes:
+      - './src:/var/www/html' # src 폴더 전체를 연결
+      - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+    depends_on:
+      - db
+
+  # API 전용 접속용 (board_list.html 등에서 호출)
+  dev2-php:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: board_php
+    container_name: board_api_container
+    environment:
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9003
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - '48091:80'
+    volumes:
+      # [변경됨] src 전체를 연결해야 DBConn.php나 connect.php를 찾을 수 있습니다.
+      - './src:/var/www/html' 
+      - './../uploadfolder:/var/www/html/data'
+      - "./conf/php_ext.ini:/usr/local/etc/php/conf.d/php_ext.ini"
+    depends_on:
+      - db
+
+  # 데이터베이스
+  db:
+    image: mysql:8.0
+    container_name: board_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sys # 디비버와 맞추기 위해 sys로 설정 권장
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

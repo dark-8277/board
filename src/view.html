@@ -1,0 +1,435 @@
+<?
+require_once $_SERVER['DOCUMENT_ROOT'] . '/INI.html';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/common/login_checkMgn.html';
+
+require_once $_SERVER['DOCUMENT_ROOT'] . "/boardProc/config/bbs_config.html";
+if(!$viewFlag) getLink("list.html?code=$code&c_code=$c_code", '권한이 없습니다.');
+
+global $G_DB;
+$db = new DBConn($G_DB);
+
+$page = 1;
+$PHP_SELF = $_SERVER['PHP_SELF'] ?? "";
+$keyfield = $keyfield ?? "";
+$search_code = "";
+$search_code .= "&topMenuMainMenuKey=" . ($_GET['topMenuMainMenuKey'] ?? 3);
+
+$code = $_POST['code'] ??  $_GET['code'] ?? "";
+$uid =  $_POST['uid'] ??  $_GET['uid'] ?? "";
+
+$query = "SELECT * FROM bbs WHERE code=? and uid=?";
+
+$row = $db->fetch($query, [$code, $uid]);
+
+$my_name = $row['name'];
+$my_id = $row['id'];
+$my_subject = $row['subject'];
+$my_email = $row['email'];
+$my_signdate = date("Y/m/d H:i",$row['signdate']);
+$my_ref = $row['ref'];
+$my_comment = $row['comment'];
+$my_fid = $row['fid'];
+$my_thread = $row['thread'];
+$my_homepage = $row['homepage'];
+$my_security = $row['security'];
+$my_passwd2 = $row['passwd'] ?? "";
+$my_hp = $row['hp'];
+$c_pass = "";
+if($adminFlag || ($my_id == $LM_ID && $my_id != ""))
+$my_passwd = $row['passwd'];
+else
+$my_passwd = '';
+
+$nowDate = date("Y-m-d");
+
+$my_good = $row['good'];
+
+if($my_security) {
+	if( $my_passwd2 != $c_pass ) {
+	   if(!$adminFlag && $my_id != $LM_ID) {
+			echo "<script>alert('비공개 글입니다.\\n비밀번호를 바르게 입력하세요.');location.href='list.html?code=$_GET[code]&c_code=$_GET[c_code]';;</script>";
+			exit;
+		}
+	}
+}
+if($BBS['carInputFlag']) {
+	require_once $_SERVER['DOCUMENT_ROOT'] . '/common/class/class.car.php';
+	$editCompany = cMakerString($row['bm_no']);
+	$editModel = cModelString($row['bo_no']);
+	$editSeries = cSeriesString($row['bs_no']);
+}
+
+$my_subject = stripslashes($my_subject);
+$my_comment = stripslashes($my_comment);
+/*
+if(is_array($cCodeDirect)) { // FAQ
+	$cCodeStr = SearchArray($cCodeDirect, $row['c_code'], 1, '');
+} else {
+	$cCodeStr = $row['c_code'];
+}
+*/
+// 데이터의 시작이 테그라면 html 수정
+
+if($row['html'] != 'Y')
+	$my_comment = nl2br($my_comment);
+
+if(!strcmp($keyfield,"subject") && $key) {
+   //$my_subject = eregi_replace("($key)", "<font color=red>\\1</font>", $my_subject);
+   $my_subject = str_ireplace($key, '<span style="color:red">$1</span>', $my_subject);
+}
+if(!strcmp($keyfield,"comment") && $key) {
+   //$my_comment = eregi_replace("($key)","<font color=red>\\1</font>",$my_comment);
+   $my_comment = str_ireplace($key,"<font color=red>$1</font>",$my_comment);
+}
+
+if(strcmp($isTagAllowed,'Y')) {
+   $my_comment = htmlspecialchars($my_comment);
+}
+
+$my_ref = $my_ref + 1;
+$ref_result = $db->execute("UPDATE bbs SET ref = ? WHERE code=? and uid=?", [$my_ref, $code, $_GET['uid']]);
+
+$num = getValues($db, "SELECT count(*) FROM bbs WHERE code=? and fid=? ORDER BY thread", 0, [$code, $my_fid]);
+//echo $num;
+$next_0 = "";
+$next_1 = "";
+$prev_0 = "";
+$prev_1 = "";
+if($num > 1) {
+	$next_query = "SELECT uid, subject FROM bbs WHERE code=? and thread > ? and fid=? ORDER BY fid DESC, thread ASC LIMIT 1";
+	$next = $db->fetch($next_query, [$code, $my_thread, $my_fid]);
+	if(!$next) {
+		$next_query = "SELECT uid, subject FROM bbs WHERE code='$code' and fid < '$my_fid' ORDER BY fid DESC, thread ASC  LIMIT 1";
+		$next = $db->fetch($next_query, [$code, $my_fid]);
+	}
+	if(!empty($next)){
+		$next = array_values($next);
+		$next_0 = $next[0];
+		$next_1 = $next[1];
+	}
+
+	$prev_query = "SELECT uid, subject FROM bbs WHERE code=? and thread < ? and fid=? ORDER BY fid ASC, thread DESC LIMIT 1";
+	$prev = $db->fetch($prev_query, [$code, $my_thread, $my_fid]);
+	if(!$prev) {
+		$prev_query = "SELECT uid, subject FROM bbs WHERE code='$code' and fid > '$my_fid' ORDER BY fid ASC, thread DESC  LIMIT 1";
+		$prev = $db->fetch($prev_query, [$code, $my_fid]);
+	}
+	if(!empty($prev)){
+		$prev = array_values($prev);
+		$prev_0 = $prev[0] ?? "";
+		$prev_1 = $prev[1] ?? "";
+	}
+	
+}else {
+	$next_query = "SELECT uid, subject FROM bbs WHERE code=? and fid < ? ORDER BY fid DESC, thread ASC  LIMIT 1";
+	$next = $db->fetch($next_query, [$code, $my_fid]);
+	if(!empty($next)){
+		$next = array_values($next);
+	}
+	
+
+	$prev_query = "SELECT uid, subject FROM bbs WHERE code=? and fid > ? ORDER BY fid ASC, thread DESC  LIMIT 1";
+	$prev = $db->fetch($prev_query, [$code, $my_fid]);
+	if(!empty($prev)){
+		$prev = array_values($prev);
+		$prev_0 = $prev[0] ?? "";
+		$prev_1 = $prev[1] ?? "";
+	}
+	
+}
+
+$next_url = "view.html?uid=".$next_0.$search_code;
+$next_sub = $next_1;
+
+$prev_url = "view.html?uid=".$prev_0.$search_code;
+$prev_sub = $prev_1;
+
+$aFilename = explode("##", $row['filename']);
+$imageCnt = 0;
+$fileCnt = 0;
+$imageStr = "";
+$fileStr = "";
+for($i = 1; $i <= $BBS['fileCount']; $i++) {
+	$fp = isset($aFilename[$i]) ? $aFilename[$i] :"";
+	if($fp) {
+		$r_filename = "/data/bbs/" . $code . "/" . $fp;
+		// 파일사이즈를 구하고 가로가 580 보다 크면 580으로 고정
+		if(is_file($_SERVER['DOCUMENT_ROOT'].$r_filename)) {
+			$fileStatus = getimagesize($_SERVER['DOCUMENT_ROOT'].$r_filename);
+			$fileWidth = $fileStatus[0] > 740 ? 740 : $fileStatus[0];
+
+			$fsFormat = getFileSize($_SERVER['DOCUMENT_ROOT'].$r_filename);
+
+			// 한글파일 처리
+			$fileInfor = explode('/', $fp);
+			$imgFile = "/data/bbs/".$code."/".$fileInfor[0]."/".rawurlencode($fileInfor[1]);
+			$linkFilename = "/boardProc/download.html?code=$code&uid=$uid&no=$i";
+
+			if($fileStatus[0]) {
+				$imageStr .= "<img src='$imgFile' width='$fileWidth' border='0'><br />";
+				$imageCnt ++;
+			}else{
+				$fileStr .= "<a href='$linkFilename'><u>$fileInfor[1]</u></a> &nbsp;( Size : $fsFormat )<br />";
+				$fileCnt ++;
+			}
+		}
+	}
+}
+
+if(!empty($searchText)) {
+	$search_code .= "&searchKey=" . urlencode($searchKey);
+	$search_code .= "&searchText=" . urlencode($searchText);
+}
+if(!empty($c_code)) {
+	$search_code .= "&c_code=" . urlencode($c_code);
+}
+$search_code .= "&code=" . urlencode($code);
+$search_code .= "&page=" . urlencode($page);
+
+$topMenuMainMenuKey = $_GET['topMenuMainMenuKey'] ?? 3;
+$topMenuSubMenuKey = 1;
+$topMenuLeftMenuKey = 0;
+$code_set = $code;
+
+?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<? include $_SERVER['DOCUMENT_ROOT'] . "/Adm/common/include/head.html"; ?>
+<SCRIPT LANGUAGE="JavaScript">
+<!--
+function show__() {
+	var ksy;
+	ksy = confirm("정말로 삭제하시겠습니까 ?");
+	if (ksy == true) document.form.submit();
+}
+
+function del() {
+	var ksy;
+	ksy = confirm("정말로 삭제하시겠습니까 ?");
+	if (ksy == true) window.location.href = "/boardProc/board_ok.html?uid=<?=$_GET['uid']?>&mode=admin_del&location=Mgn<?=$search_code?>";
+	else history.back();
+}
+//-->
+</SCRIPT>
+<STYLE TYPE="text/css">
+p { margin:2px; }
+</STYLE>
+</head>
+
+<body>
+<div class="subWrap">
+<? include $_SERVER['DOCUMENT_ROOT'] . "/Adm/common/include/header.html"; ?>
+	<div class="container">
+<!-- [s]subMenu -->
+		<? include "menu.html"; ?>
+<!-- [e]subMenu -->
+<!-- [s]content -->
+		<div class="content">
+			<div class="navi"><img src="/Adm/image/sub/icon_home.gif"><span>&gt;</span><?=$BBS['dMenu']?><span>&gt;</span><?=$BBS['title']?></div>
+			<h1 class="title"><?=$BBS['title']?> 상세보기</h1>
+<!-- [s]기업정보 -->
+ <div class="card">
+	<div class="list_wrap">
+<IFRAME NAME='processIframe' SRC='' WIDTH=0 HEIGHT=0 FRAMEBORDER=0 SCROLLING=NO></IFRAME>
+			<table width="100%" border="0" cellspacing="0" cellpadding="0" class="t_from">
+				 	<colgroup>
+						<col style="width:120px">
+						<col style="*"/>
+						<col style="width:120px">
+						<col style="*"/>
+					</colgroup>
+<?if($BBS['carInputFlag']) {?>
+					<tr>
+						<th>차종</th>
+						<td>[<?=$editCompany?>] <?=$editModel?> <?=$editSeries?></td>
+					</tr>
+<?}?>
+					<tr>
+						<th>제목</th>
+						<td colspan="3"><?=$my_subject?></td>
+					</tr>
+
+					<tr>
+						<th>작성자</th>
+						<td><?=$my_name?></td>
+						<th>연락처</th>
+						<td><?=$my_hp?></td>
+					</tr>
+					<tr>
+						<th>작성일</th>
+						<td><?=$my_signdate?></td>
+						<th>조회수</th>
+						<td><?=$my_ref?></td>
+					</tr>
+
+                          <?if($fileCnt > 0) {?>
+					<tr>
+						<th>첨부파일</th>
+						<td colspan="3">
+						<?=$fileStr?>
+						</td>
+					</tr>
+<?}?>
+<?if($imageCnt > 0) {?>
+					<tr>
+						<th>첨부파일</th>
+						<td colspan="3">
+
+<?=$imageStr?>
+						</td>
+					</tr>
+<?}?>
+					<tr>
+						<th>내용</th>
+						<td colspan="3">
+						
+<?=$my_comment?>
+						</td>
+					</tr>
+				</table>
+ </div><!-- .list_wrap -->
+
+ <div class="footerFix">
+				<div class="button_wrap center">
+				<div class="item">
+<?if($BBS['replyFlag'] == "Y" && $replyFlag){?>
+				<button type="button" value="답글" class="button" onclick="location.href = 'write.html?ruid=<?=$_GET['uid']?>&page=<?=$page . $search_code?>';" />답글</button>
+<?}?>
+<?if(($row['id'] == $LM_ID && $LM_ID != "") || $LM_LEVEL == 9){?>
+				<button type="button" value="수정"  class="button btn_reset" onclick="location.href = 'write.html?uid=<?=$_GET['uid']?>&page=<?=$page . $search_code?>';" />수정</button>
+				<button type="button" value="삭제"  class="button btn_era" onclick="show__();" />삭제</button>
+
+
+<table id="a" width="" border="0" cellspacing="0" cellpadding="5" style="position:absolute;display:none">
+<form name="form" method="post" action="/boardProc/board_ok.html">
+	<tr>
+		<td height="30" align="right">* 비밀번호 <input type="password" name="delpws" size="10" maxlength="10" class="inborder" value='<?=$my_passwd?>'><input type="hidden" name="mode" value="del"><input type="hidden" name="uid" value="<?=$_GET['uid']?>"><input type="hidden" name="code" value="<?=$_GET['code']?>"><input type="hidden" name="c_code" value="<?=$_GET['c_code'] ?? ''?>"><input type="hidden" name="url" value="<?=$PHP_SELF?>"><input type="hidden" name="page" value="<?=$page?>"><input name="location" type="hidden" value="Mgn">&nbsp;&nbsp;</td>
+	</tr>
+</form>
+</table>
+<?}?>
+				</div><!-- .item -->
+				<div calss="item">
+				   <button type="button" value="목록"  class="button" onclick="location.href = 'list.html?page=<?=$page . $search_code?>';" />목록</button>
+				</div>
+				</div><!-- .button_wrap -->
+
+
+<IFRAME NAME='mentIframe' SRC='' WIDTH=0 HEIGHT=0 FRAMEBORDER=0 SCROLLING=NO></IFRAME>
+<?
+#################################################################
+# 댓글 시작
+if($BBS['commentFlag']=='Y') {
+?>
+<script language="javascript">
+<!--
+function del2_a(num) {
+	var ksy;
+	ksy = confirm("정말로 삭제하시겠습니까?\n(관리자권한 삭제)");
+	if (ksy == true)
+		mentIframe.location.href = "/boardProc/ment2_ok.html?pnum=<?=$_GET['uid']?>&no="+num+"&c_pass=<?=$c_pass?>&mode=del&location=Mgn<?=$search_code?>";
+}
+function del2(num) {
+	var ksy;
+	ksy = confirm("정말로 삭제하시겠습니까 ?");
+	if (ksy == true)
+		mentIframe.location.href = "/boardProc/ment2_ok.html?pnum=<?=$_GET['uid']?>&no="+num+"&c_pass=<?=$c_pass?>&mode=del&location=Mgn<?=$search_code?>";
+}
+function send_repl() {
+	var f = document.ment;
+	if(f.ptext.value == "") {
+		alert("댓글 내용을 입력하세요");
+		f.ptext.focus();
+		return false;
+	}
+}
+//-->
+</script>
+<div class="comment_wrap">
+
+<h2>댓글 (댓글 내용이 푸쉬로 문의자 에게 전달됩니다.)</h2>
+<form name="ment" method="post" target="mentIframe" action="/boardProc/ment2_ok.html" onsubmit="return send_repl();">
+<input type="hidden" name="code" value="<?=$code_set?>">
+<input type="hidden" name="c_code" value="<?=$c_code ?? ''?>">
+<input type="hidden" name="pnum" value="<?=$uid?>">
+<input name="p_id" type="hidden" value="<?=$LM_ID?>">
+<input name="pt_id" type="hidden" value="<?=$my_id?>">
+<input name="ppass" type="hidden">
+<input name="pname" type="hidden">
+<input name="c_pass" type="hidden" value="<?=$my_passwd2?>">
+<input name="location" type="hidden" value="Mgn">
+					
+			<div class="item_box">
+				<textarea name="ptext" cols="70" rows="4"><?if(!$LM_ID){?>로그인이 필요합니다. <?}?><?if(!$commentFlag){?>댓글을 쓸 권한이 없습니다.<?}?></textarea>
+				<input type="submit" value="등록" />
+				
+			</div><!--.box  -->
+					
+</form>
+	<!-- 답변리스트 -->
+  <div class="reply_list">
+	<ul>
+	<?
+	$query = "SELECT no, pnum, pcode, pname, ppass, pid, ptext, signdate FROM bbsTxt WHERE  pnum = ? and pcode=? order by no desc";
+
+	$result = $db->fetchAll($query, [$_GET['uid'] ?? '', $_GET['code'] ?? '']);
+	
+	$total = getValues($db, "SELECT COUNT(*) FROM bbsTxt WHERE  pnum = ? and pcode=?", 0, [$_GET['uid'] ?? '', $_GET['code'] ?? '']);
+
+	if($total != 0) {
+		foreach($result as $rows) {
+			$rows = array_values($rows);
+			//var_dump($rows);
+			$Bid = $rows[0];
+			$BabyNum = $rows[1];
+			$Wname = $rows[3];
+			$Wid = $rows[5];
+			$Wtext = $rows[6];
+			$Wtime = $rows[7];
+			$r_date=date("m/d", $Wtime);
+			$r_time=date("H:i", $Wtime);
+			$to = explode("-",$r_date);
+
+			if($Wid) {
+				if($Wname == "")
+					$Wname = getValues($db, "select MB_NAME from Mbr_Members where MB_ID=?", "", [$Wid]);
+				$Vid = "(".$Wid.")";
+			}
+
+
+	?>
+
+			
+				<li>
+					<div><span class="name"><?=$Wname.$Vid?></span><span><?=$Wtext?></span></div>
+					<div><span class="date"><?=$r_date?>, <?=$r_time?></span><span><input type="button" value="삭제" onclick="del2_a(<?=$Bid?>);" /></span></div>
+				</li>
+
+	<?
+		}
+	}
+	?>
+	   </ul>
+    </div><!-- .reply_list -->		
+
+</div><!--  .comment_wrap-->
+
+<?
+}
+# 댓글 끝
+###################################################################
+?>
+
+<!-- [e]기업정보 -->
+
+</div><!--  .footerFix-->
+     
+		</div><!-- .card -->
+	</div><!--  content-->
+</div><!-- [e]container -->
+<? include $_SERVER['DOCUMENT_ROOT'] . "/Adm/common/include/footer.html"; ?>
+</div><!-- .subWrap -->
+</body>
+</html>
+</table>

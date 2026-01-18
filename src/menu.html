@@ -1,0 +1,20 @@
+<!-- [s]subMenu -->
+		<div class="subMenu">
+			<h1 class="title">게시판관리</h1>
+			<ul>
+<?
+// 게시판 기본 설정등을 가져온다.
+$menuCnt = 0;
+$menuResult = $db->fetchAll("select * from bbsMaster where view=? order by no", ["Y"]);
+foreach($menuResult as $menu) {
+?>
+				<li<?if($code == $menu['code']) {?> class="on"<?}?>>
+					<a href="/Adm/board/list.html?code=<?=$menu['code']?>" class="subTitle"><?=$menu['title']?></a>
+				</li>
+<?
+	$menuCnt ++;
+}
+?>
+			</ul>
+		</div>
+<!-- [e]subMenu -->
