@@ -58,8 +58,7 @@ exit; // 스크립트 실행 후 아래 PHP 코드가 실행되지 않도록 중
 }
 
 function post_json($code, $msg) {
-    global $LM_ID;
-    echo json_encode(["code" => $code, "tel" => $LM_ID, "msg" => $msg]);
+    echo json_encode(["code" => $code, "msg" => $msg]);
     exit;
 }
 ?>

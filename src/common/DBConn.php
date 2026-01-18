@@ -236,5 +236,10 @@ class DBConn {
             return $inserted ? "inserted" : "failed";
         }
     }
+
+    public function getLastId() {
+    // $this->conn은 mysqli 연결 객체입니다.
+        return $this->mysqli->insert_id;
+    }
 }
 ?>
