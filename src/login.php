@@ -5,7 +5,7 @@ require_once 'connect.php';
 require_once 'DBConn.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+    $username = $_POST['id'] ?? '';
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
