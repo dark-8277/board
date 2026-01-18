@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        var y = false;
+        var t = "0";
+
+        if (t == "1" || t == "0") {
+            y = true;
+        }
+        function ttt() {
+            if (y) {
+                if (t == "1")
+                alert("1");
+            } else if (t == "0") {
+                alert("0")
+            } else {
+                alert("2")
+            }
+        }
+    </script>
+    <input id="count" type="button" value="글쓰기" onclick="ttt();">
+</body>
+</html>
