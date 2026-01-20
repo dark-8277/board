@@ -40,7 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_request'])) {
             // 수정 로직
             $sql = "UPDATE board_write SET title = ?, content = ? WHERE idx = ? AND user_id = ?";
             $db->execute($sql, [$title, $content, $idx, $author]);
-            echo json_encode(["code" => "0", "msg" => "수정되었습니다.", "idx" => $idx]);
+            
+            post_json("0", "수정되었습니다.", $idx);
         } else {
             // 등록 로직
             $insertData = [
@@ -51,10 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax_request'])) {
                 'view_cnt' => 0
             ];
             $db->insertDynamic('board_write', $insertData);
-            echo json_encode(["code" => "0", "msg" => "등록되었습니다.", "idx" => $db->getLastId()]);
+            post_json("0", "등록되었습니다.", $db->getLastId());
         }
     } catch (Exception $e) {
-        echo json_encode(["code" => "3", "msg" => "DB 에러: " . $e->getMessage()]);
+        post_json("3", "DB 에러 : ". $e->getMessage());
     }
     exit;
 }
@@ -85,6 +86,11 @@ if ($mode === 'edit' && !empty($idx)) {
     } catch (Exception $e) {
         die("데이터 로딩 실패: " . $e->getMessage());
     }
+}
+
+function post_json($code, $msg, $idx) {
+    echo json_encode(["code" => $code, "msg" => $msg, "idx" => $idx]);
+    exit;
 }
 ?>
 
