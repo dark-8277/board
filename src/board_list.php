@@ -7,7 +7,6 @@ try {
     $db = new DBConn($G_DB);
     
     // 1. 전체 게시글을 최신순으로 가져오는 SQL
-    // board_list.php 수정
     $sql = "SELECT idx, title, user_id, reg_date FROM sys.board_write ORDER BY idx DESC";
     
     // 2. 여러 줄의 데이터를 배열로 가져옵니다.
@@ -74,8 +73,8 @@ try {
 <div class="container">
     <div class="board-card">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold"><i class="fa-solid fa-list-ul me-2"></i>자유 게시판</h2>
-            <a href="board_write.html" class="btn btn-primary btn-write">
+            <h2 class="fw-bold">자유 게시판</h2>
+            <a href="board_write.php" class="btn btn-primary btn-write">
                 <i class="fa-solid fa-pen me-1"></i> 글쓰기
             </a>
         </div>
@@ -92,11 +91,16 @@ try {
                 </thead>
                 <tbody>
                     <?php if (!empty($list)): ?>
-                        <?php foreach ($list as $row): ?>
+                        <?php 
+                            // 가상 번호를 위해 전체 게시글 개수를 구합니다.
+                            $total_count = count($list); 
+                        ?>
+                        <?php foreach ($list as $index => $row): ?>
                         <tr>
-                            <td><?php echo $row['idx']; ?></td>
+                            <td><?php echo $total_count - $index; ?></td>
+                            
                             <td class="title-td">
-                                <a href="show.php?idx=<?php echo $row['idx']; ?>">
+                                <a href="board_show.php?idx=<?php echo $row['idx']; ?>">
                                     <?php echo htmlspecialchars($row['title']); ?>
                                 </a>
                             </td>
