@@ -1,85 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입 페이지</title>
+    <title>회원가입</title>
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Pretendard', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 450px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #f1f3f5;
+            padding: 30px 30px 10px 30px;
+            text-align: center;
+        }
+
+        .card-header h4 {
+            font-weight: 700;
+            color: #333;
+            letter-spacing: -1px;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 15px;
+            height: auto;
+            border: 1px solid #e9ecef;
+            background-color: #f8f9fa;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.1);
+            outline: none;
+        }
+
+        .btn-register {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            background-color: #0d6efd;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function login_valid_check() {
-     
-            const id = $("#id").val().trim(); // 아이디
-            const pw = $("#password").val().trim(); // 비밀번호
-            const email = $("#email").val().trim(); // 이메일
+            const id = $("#id").val().trim();
+            const pw = $("#password").val().trim();
+            const email = $("#email").val().trim();
 
-            // ===== 클라이언트 기본 유효성 검사 =====
-
-            if (!id) {
-                alert("아이디를 입력해주세요.");
-                return false;
-            }
-
-            if (!email) {
-                alert("이메일을 입력해 주세요.");
-                return false;
-            }
-
-            if (!pw) {
-                alert("비밀번호를 입력해 주세요.");
-                return false;
-            }
+            if (!id) { alert("아이디를 입력해주세요."); return false; }
+            if (!email) { alert("이메일을 입력해 주세요."); return false; }
+            if (!pw) { alert("비밀번호를 입력해 주세요."); return false; }
 
             var data = {
-                user_pw : pw,
-                user_id : id,
-                email : email
+                user_pw: pw,
+                user_id: id,
+                email: email
             };
 
             $.ajax({
-                url: "register.php",     // 요청 보낼 서버 주소
-                type: "POST",            // 전송 방식
-                dataType: "json",        // 서버에서 받을 데이터 형식
-                data: data, // 전송할 값
-
-                success: function(res) { // 성공 시 실행
-                    if (res.code == "1") { // 성공 시 이동
-                        location.href = "/login.html"
+                url: "register.php",
+                type: "POST",
+                dataType: "json",
+                data: data,
+                success: function(res) {
+                    if (res.code == "1") {
+                        alert("회원가입이 완료되었습니다!");
+                        location.href = "/login.html";
                     } else {
-                        alert(res.msg); // 다른 오류 코드 일시
+                        alert(res.msg);
                     }
                 }
             });
         }
     </script>
-
+</head>
 <body>
+
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card mt-5">
-                    <div class="card-header">
-                        <h4>회원가입</h4>
-                    </div>
-                    <div class="card-body">
-                            <div class="form-group">
-                                <label for="id">아이디</label>
-                                <input type="text" name="user_id" id="id" class="form-control" placeholder="아이디를 입력해주세요" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">이메일</label>
-                                <input type="email" name="email" id="email" class="form-control"placeholder="이메일을 입력해주세요" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">비밀번호</label>
-                                <input type="password" name="user_pw" id="password" class="form-control" placeholder="비밀번호를 입력해주세요" required>
-                            </div>
-                            <button onclick="login_valid_check();" class="btn btn-primary">회원가입하기</button>
-                    </div>
+        <div class="card">
+            <div class="card-header">
+                <h4>회원가입</h4>
+                <p class="text-muted small">새로운 계정을 만들고 시작하세요.</p>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="id">아이디</label>
+                    <input type="text" id="id" class="form-control" placeholder="아이디를 입력해주세요">
+                </div>
+                <div class="form-group">
+                    <label for="email">이메일</label>
+                    <input type="email" id="email" class="form-control" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" class="form-control" placeholder="비밀번호를 입력해주세요">
+                </div>
+                <button onclick="login_valid_check();" class="btn btn-primary btn-register">가입하기</button>
+                
+                <div class="footer-link">
+                    이미 계정이 있으신가요? <a href="/login.html">로그인하기</a>
                 </div>
             </div>
         </div>
     </div>
+
 </body>
 </html>
